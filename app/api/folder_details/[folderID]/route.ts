@@ -1,8 +1,9 @@
 import axios from "axios";
-import { getGoogleDriveApiKey } from "@/app/lib/utils";
+
 import { NextRequest } from "next/server";
-import responseBuilder, { jsonResponse } from "@/app/lib/response";
+import responseBuilder, { jsonResponse } from "@/lib/response";
 import { CourseItem } from "@/schema/CourseItem";
+import { getGoogleDriveApiKey } from "@/lib/utils";
 
 
 
@@ -25,21 +26,42 @@ interface GoogleDriveResponse {
 //   children?: CourseItem[];
 // }
 
+/**
+ * Fetches the name of a single folder from Google Drive.
+ * @param folderID The ID of the folder to fetch.
+ * @returns The name of the folder.
+ */
+async function getFolderName(folderID: string): Promise<string> {
+  const apiKey = getGoogleDriveApiKey();
+  const url = `https://www.googleapis.com/drive/v3/files/${folderID}?key=${apiKey}&fields=name`;
+  
+  const response = await axios.get<{ name: string }>(url);
+  return response.data.name;
+}
+
 // Your main API route handler
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ folderID: string }> }
 ) {
   try {
-    const { folderID } = await context.params; // ✅ must await params
-    
-    // Start the recursive fetch from the root folder
-    const nestedCourseData = await getFolderContents(folderID);
+    const { folderID } = await context.params;
 
-    return jsonResponse(responseBuilder.success(nestedCourseData));
+    // --- MODIFIED LOGIC ---
+    // Run both async operations in parallel for better performance
+    const [courseName, nestedCourseData] = await Promise.all([
+      getFolderName(folderID),         // Fetches the root folder's name
+      getFolderContents(folderID)      // Recursively fetches all contents
+    ]);
+
+    // Create a metadata object with the course name
+    const metadata = { courseName };
+
+    // Pass the data and the new metadata to the response builder
+    return jsonResponse(responseBuilder.success(nestedCourseData, metadata));
+
   } catch (error) {
     console.error("Failed to fetch Google Drive data:", error);
-    // Add proper error handling
     return jsonResponse(responseBuilder.error("Failed to retrieve course data."));
   }
 }

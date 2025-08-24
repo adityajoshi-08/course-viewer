@@ -34,12 +34,13 @@ const responseBuilder = {
    * @param data - The data payload to return.
    * @param status - Optional HTTP status code (default is 200).
    */
-  success<T>(data: T, status = 200) {
+  success<T>(data: T, metadata?: any, status = 200) {
     return {
       status,
       success: true,
       error: null,
       data,
+      metadata,
       timestamp: new Date().toISOString(),
     };
   },
