@@ -1,10 +1,11 @@
-// Your main component file, e.g., app/courses/[folderID]/page.tsx
+// app/courses/[folderID]/page.tsx
 
-"use client"
+"use client";
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { getCourses, getCourseTimestamp } from '@/actions/courses';
+// Ensure your actions file has a 'getCourse' function
+import { getCourses } from '@/actions/courses'; 
 import CourseSidebar from '@/components/CourseSidebar';
 import { LessonViewer } from '@/components/LessonViewer';
 import { CourseItem } from '@/schema/CourseItem';
@@ -72,31 +73,11 @@ export default function ViewCourse() {
   React.useEffect(() => {
     if (!courseId) return;
 
+    // Simplified data fetching logic without caching
     async function initializeCourse() {
       setLoading(true);
-      const cacheKey = `course-cache-${courseId}`;
-      const cachedItemString = window.localStorage.getItem(cacheKey);
 
-      if (cachedItemString) {
-        const cachedItem = JSON.parse(cachedItemString);
-        // Step 1: Ask for the latest timestamp
-        const latestTimestampResponse: any = await getCourseTimestamp(courseId);
-
-        // Step 2: Compare timestamps
-        if (latestTimestampResponse.data?.modifiedTime === cachedItem.metadata?.modifiedTime) {
-          console.log("✅ Cache HIT: Data is fresh, using local version.");
-          // Step 3 (Cache Hit): Use cached data
-          setData(cachedItem.data);
-          document.title = cachedItem.metadata.courseName + " - Course Viewer";
-          loadUserProgress(cachedItem.data);
-          setLoading(false);
-          return; // Done!
-        }
-        console.log("⚠️ Cache is stale. Refetching...");
-      }
-
-      // Step 3 (Cache Miss): Fetch fresh data if no cache or timestamps mismatch
-      console.log("🔄 Cache MISS: Fetching fresh data from server.");
+      // Directly fetch fresh data from the server every time
       const freshData: any = await getCourses(courseId);
       
       if (freshData.error) {
@@ -105,34 +86,36 @@ export default function ViewCourse() {
         return;
       }
 
+      // Set the course data and page title
       setData(freshData.data);
-      document.title = freshData.metadata.courseName + " - Course Viewer";
+      if (freshData.metadata?.courseName) {
+        document.title = freshData.metadata.courseName + " - Course Viewer";
+      }
+
+      // Load user progress from localStorage (we still keep this)
       loadUserProgress(freshData.data);
       
-      // Update the cache with the fresh data
-      window.localStorage.setItem(cacheKey, JSON.stringify(freshData));
       setLoading(false);
     }
 
-    // Helper to load user progress (completed lessons, last viewed)
     function loadUserProgress(courseData: CourseItem[]) {
-        const completedString = window.localStorage.getItem('completedProgress');
-        if (completedString) {
-            const allCompleted = JSON.parse(completedString);
-            if (allCompleted[courseId]) {
-                setCompletedLessons(new Set(allCompleted[courseId]));
-            } else {
-                setCompletedLessons(new Set()); // Reset for new course
-            }
-        }
-        const progressString = window.localStorage.getItem('courseProgress');
-        const allProgress: CourseProgress = progressString ? JSON.parse(progressString) : {};
-        const lastViewedId = allProgress[courseId];
-        let lessonToView = findLessonById(courseData, lastViewedId || "");
-        if (!lessonToView) {
-            lessonToView = findFirstLesson(courseData);
-        }
-        setActiveLesson(lessonToView);
+      const completedString = window.localStorage.getItem('completedProgress');
+      if (completedString) {
+          const allCompleted = JSON.parse(completedString);
+          if (allCompleted[courseId]) {
+              setCompletedLessons(new Set(allCompleted[courseId]));
+          } else {
+              setCompletedLessons(new Set());
+          }
+      }
+      const progressString = window.localStorage.getItem('courseProgress');
+      const allProgress: CourseProgress = progressString ? JSON.parse(progressString) : {};
+      const lastViewedId = allProgress[courseId];
+      let lessonToView = findLessonById(courseData, lastViewedId || "");
+      if (!lessonToView) {
+          lessonToView = findFirstLesson(courseData);
+      }
+      setActiveLesson(lessonToView);
     }
 
     initializeCourse();
