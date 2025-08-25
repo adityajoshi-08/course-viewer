@@ -26,7 +26,7 @@ export default function Home() {
       folderID = folderInput
     }
 
-    router.push(`/view/${folderID}`)
+    router.push(`/course/${folderID}`)
   }
 
   return (
