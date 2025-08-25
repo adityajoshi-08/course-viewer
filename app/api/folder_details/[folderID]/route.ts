@@ -1,45 +1,32 @@
-import axios from "axios";
+// app/folder_details/[folderID]/route.ts
 
+import axios from "axios";
 import { NextRequest } from "next/server";
 import responseBuilder, { jsonResponse } from "@/lib/response";
 import { CourseItem } from "@/schema/CourseItem";
 import { getGoogleDriveApiKey } from "@/lib/utils";
 
-
-
+// --- Re-introducing the TypeScript interfaces for type safety ---
 interface GoogleDriveResponseObject {
-  "id": string;
-  "name": string;
-  "kind": string;
-  "mimeType"?: string;
+  id: string;
+  name: string;
+  kind: string;
+  mimeType?: string;
 }
 
 interface GoogleDriveResponse {
-  "files": GoogleDriveResponseObject[];
+  files: GoogleDriveResponseObject[];
 }
 
-// interface CourseItem {
-//   id: string;
-//   name: string;
-//   type: "folder" | "file";
-//   mimeType?: string;
-//   children?: CourseItem[];
-// }
-
-/**
- * Fetches the name of a single folder from Google Drive.
- * @param folderID The ID of the folder to fetch.
- * @returns The name of the folder.
- */
-async function getFolderName(folderID: string): Promise<string> {
+// Helper to get folder metadata (name AND modifiedTime)
+async function getFolderMetadata(folderID: string) {
   const apiKey = getGoogleDriveApiKey();
-  const url = `https://www.googleapis.com/drive/v3/files/${folderID}?key=${apiKey}&fields=name`;
-  
-  const response = await axios.get<{ name: string }>(url);
-  return response.data.name;
+  const url = `https://www.googleapis.com/drive/v3/files/${folderID}?key=${apiKey}&fields=name,modifiedTime`;
+  const response = await axios.get<{ name: string; modifiedTime: string }>(url);
+  return response.data;
 }
 
-// Your main API route handler
+// Main handler
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ folderID: string }> }
@@ -47,59 +34,47 @@ export async function GET(
   try {
     const { folderID } = await context.params;
 
-    // --- MODIFIED LOGIC ---
-    // Run both async operations in parallel for better performance
-    const [courseName, nestedCourseData] = await Promise.all([
-      getFolderName(folderID),         // Fetches the root folder's name
-      getFolderContents(folderID)      // Recursively fetches all contents
+    const [folderMetadata, nestedCourseData] = await Promise.all([
+      getFolderMetadata(folderID),
+      getFolderContents(folderID),
     ]);
 
-    // Create a metadata object with the course name
-    const metadata = { courseName };
+    const metadata = {
+      courseName: folderMetadata.name,
+      modifiedTime: folderMetadata.modifiedTime,
+    };
 
-    // Pass the data and the new metadata to the response builder
     return jsonResponse(responseBuilder.success(nestedCourseData, metadata));
-
   } catch (error) {
     console.error("Failed to fetch Google Drive data:", error);
     return jsonResponse(responseBuilder.error("Failed to retrieve course data."));
   }
 }
 
-// Helper function to recursively fetch folder contents
+// Recursive helper to get contents
 async function getFolderContents(folderID: string): Promise<CourseItem[]> {
   const apiKey = getGoogleDriveApiKey();
   const url = `https://www.googleapis.com/drive/v3/files?key=${apiKey}&q='${folderID}' in parents&fields=files(id, name, mimeType)&orderBy=name`;
 
+  // --- FIX APPLIED ---
+  // Use the generic type for a fully typed response
   const response = await axios.get<GoogleDriveResponse>(url);
   const files = response.data.files || [];
-
-  // This will store the final, nested structure
   const content: CourseItem[] = [];
 
   for (const file of files) {
-    if (file.mimeType === 'application/vnd.google-apps.folder') {
-      const subfolderContent = await getFolderContents(file.id);
-      content.push({
-        id: file.id,
-        name: file.name,
-        type: 'folder',
-        children: subfolderContent,
-      });
+    if (file.mimeType === "application/vnd.google-apps.folder") {
+      const children = await getFolderContents(file.id);
+      content.push({ id: file.id, name: file.name, type: "folder", children });
     } else {
-
-      // const downloadUrl = `https://drive.google.com/uc?id=${file.id}&export=download`;
-      const downloadUrl = `https://drive.google.com/file/d/${file.id}/preview`;
-
       content.push({
         id: file.id,
         name: file.name,
-        type: 'file',
+        type: "file",
         mimeType: file.mimeType,
-        url: downloadUrl, // Add the manually constructed URL
+        url: `https://drive.google.com/file/d/${file.id}/preview`,
       });
     }
   }
-
   return content;
 }

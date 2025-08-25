@@ -26,7 +26,7 @@ export function LessonViewer({ lesson, onComplete }: LessonViewerProps) {
       {/* --- MODIFIED --- */}
       {/* This container will now grow to fill the space, and the iframe will fill it. */}
       {lesson.mimeType.startsWith('video/') && (
-        <div className="w-full flex-1">
+        <div className="w-full h-[80%]">
           <iframe 
             src={lesson.url} 
             className="w-full h-full" 

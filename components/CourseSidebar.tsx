@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+import { Checkbox } from "./ui/checkbox";
+
 interface CourseItemProps {
     item: CourseItem;
     activeLessonId: string | null;
@@ -52,9 +54,14 @@ export function CourseItemComponent({ item, activeLessonId, completedLessons, on
   return (
     <div 
       onClick={() => onLessonClick(item)}
-      className={itemClasses}
+      className={`${itemClasses} flex items-center gap-2`}
     >
-      <span className="mr-2" style={{ color: isCompleted ? '#22c55e' : '#9ca3af' }}>●</span>
+      <Checkbox
+        checked={isCompleted}
+        disabled 
+        // This class forces the checkbox to be visible even when disabled
+        className="disabled:opacity-100"
+      />
       <span>{item.name}</span>
     </div>
   );
@@ -70,10 +77,13 @@ interface CourseSidebarProps {
 }
 
 
-export default function CourseSidebar({ items, activeLessonId, completedLessons, onLessonClick }: CourseSidebarProps) {
+export default function CourseSidebar({items, activeLessonId, completedLessons, onLessonClick }: CourseSidebarProps) {
   return (
     // This is the corrected container div
     <div className="flex flex-col gap-2 pt-10 pb-5 flex-shrink-0 w-[300px] h-screen overflow-y-auto border-r">
+      <span className="font-bold">
+        {document.title}
+      </span>
       {(items || []).map(item => (
         <CourseItemComponent 
           key={item.id}
