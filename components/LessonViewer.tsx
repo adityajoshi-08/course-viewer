@@ -36,6 +36,18 @@ export function LessonViewer({ lesson, onComplete }: LessonViewerProps) {
           ></iframe>
         </div>
       )}
+      
+      {lesson.mimeType.startsWith('application/pdf') && (
+        <div className="w-full h-[90%]">
+          <iframe 
+            src={lesson.url} 
+            className="w-full h-full" 
+            title={lesson.name}
+            // Add allowFullScreen for a better user experience
+            allowFullScreen 
+          ></iframe>
+        </div>
+      )}
 
       {/* --- MODIFIED --- */}
       {/* This container will not shrink, ensuring the button is always visible and clickable. */}
