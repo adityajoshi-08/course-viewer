@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         // Add a new font family
-        poppins: ['--font-poppins'],
+        poppins: ['var(--font-poppins)', 'sans-serif'],
       },
     },
   },

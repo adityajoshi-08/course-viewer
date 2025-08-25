@@ -35,8 +35,8 @@ export function LessonViewer({ lesson, onComplete }: LessonViewerProps){
         </div>
       )}
       <div className='w-full flex items-center justify-between mt-4'>
-        <h2 className='text-xl font-semibold font-poppins'>{lesson.name}</h2>
-        <button onClick={onComplete} className='border border-blue-500 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer'>
+        <h2 className='text-lg font-semibold font-poppins break-words max-w-[75%]'>{lesson.name}</h2>
+        <button onClick={onComplete} className='border border-blue-500 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer w-[15vw]'>
             Complete and Continue
         </button>
       </div>

@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button"
 import { BookOpen, Github } from "lucide-react"
 import React from "react"
 import { ToggleTheme } from "./theme-toggler"
+import { useRouter } from "next/navigation"
 
 export default function Navbar() {
+  const router = useRouter()
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-0 py-4 flex items-center justify-between">
         {/* Logo + Title */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
           <BookOpen className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">Course Viewer</h1>
         </div>
