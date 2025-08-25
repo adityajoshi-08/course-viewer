@@ -1,13 +1,21 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Inter } from "next/font/google"
+import { Geist, Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/navbar"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const geist = Geist({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist",
+})
+
+const poppins = Poppins({
+  weight: ["400", "600", "700"],
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-poppins",
 })
 
 const inter = Inter({
@@ -29,10 +37,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${inter.variable} antialiased`}>
+    <html lang="en" className={`${geist.variable} ${inter.variable} ${poppins.variable} antialiased`}>
       <body>
-        <Navbar />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -25,19 +25,21 @@ export function LessonViewer({ lesson, onComplete }: LessonViewerProps){
     // }
     
   return (
-    <main style={{ flex: 1}} className='overflow-y-auto p-5'>
-      <h2>{lesson.name}</h2>
-
+    <main style={{ flex: 1}} className='overflow-y-auto p-5 pt-1'>
       {lesson.mimeType.startsWith('video/') && (
         // <video controls width="100%" src={lesson.url} key={lesson.id}>
         //   Sorry, your browser doesn't support embedded videos.
         // </video>
-        <iframe src={lesson.url} className="w-full h-full" title={lesson.name}></iframe>
+        <div className="w-full h-[80vh]" >
+            <iframe src={lesson.url} className="w-full h-full max-h-[80vh]" title={lesson.name}></iframe>
+        </div>
       )}
-      
-      <button onClick={onComplete} style={{ marginTop: '20px' }}>
-        Complete and Continue
-      </button>
+      <div className='w-full flex items-center justify-between mt-4'>
+        <h2 className='text-xl font-semibold font-poppins'>{lesson.name}</h2>
+        <button onClick={onComplete} className='border border-blue-500 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer'>
+            Complete and Continue
+        </button>
+      </div>
     </main>
   );
 };

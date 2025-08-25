@@ -139,7 +139,7 @@ export default function ViewCourse() {
   }
 
   return (
-    <div className='flex w-screen h-screen'>
+    <div className='flex w-screen h-screen container mx-auto'>
       <CourseSidebar
         items={data}
         activeLessonId={activeLesson?.id || null}

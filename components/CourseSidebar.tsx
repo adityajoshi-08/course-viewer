@@ -73,7 +73,7 @@ interface CourseSidebarProps {
 export default function CourseSidebar({ items, activeLessonId, completedLessons, onLessonClick }: CourseSidebarProps) {
   return (
     // This is the corrected container div
-    <div className="flex flex-col gap-2 pt-10 pb-5 flex-shrink-0 w-[300px] h-screen overflow-y-auto border-r border-gray-200 bg-white">
+    <div className="flex flex-col gap-2 pt-10 pb-5 flex-shrink-0 w-[300px] h-screen overflow-y-auto border-r">
       {(items || []).map(item => (
         <CourseItemComponent 
           key={item.id}
