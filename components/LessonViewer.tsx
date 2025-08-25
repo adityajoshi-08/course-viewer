@@ -49,6 +49,10 @@ export function LessonViewer({ lesson, onComplete }: LessonViewerProps) {
         </div>
       )}
 
+
+
+
+
       {/* --- MODIFIED --- */}
       {/* This container will not shrink, ensuring the button is always visible and clickable. */}
       <div className='w-full flex items-center justify-between mt-4 flex-shrink-0'>
