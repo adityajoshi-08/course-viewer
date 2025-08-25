@@ -17,6 +17,8 @@ export default function Navbar() {
           <h1 className="text-2xl font-bold text-foreground">Course Viewer</h1>
         </div>
 
+      
+
         {/* GitHub CTA */}
         <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" asChild>

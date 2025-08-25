@@ -4,6 +4,7 @@ import { getCourses } from '@/actions/courses';
 import CourseSidebar from '@/components/CourseSidebar';
 import { LessonViewer } from '@/components/LessonViewer';
 import { CourseItem } from '@/schema/CourseItem';
+import { Flashlight } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import React from 'react';
 
@@ -43,6 +44,19 @@ function findLessonById(items: CourseItem[], id: string): CourseItem | null {
   }
   return null;
 }
+
+function getFlatLessons(items: CourseItem[]): CourseItem[] {
+  return items.reduce<CourseItem[]>((acc, item) => {
+    if (item.type === 'file') {
+      acc.push(item);
+    } else if (item.type === 'folder' && item.children) {
+      // Recursively flatten children and add them to the accumulator
+      acc.push(...getFlatLessons(item.children));
+    }
+    return acc;
+  }, []);
+}
+
 
 // Define a type for our progress object for better type safety
 type CourseProgress = {
@@ -134,6 +148,23 @@ export default function ViewCourse() {
     window.localStorage.setItem('courseProgress', JSON.stringify(allProgress));
   }
 
+  function handleCompleteAndContinue() {
+    if (!activeLesson || data.length === 0) return;
+
+    const flatLessons = getFlatLessons(data);
+    console.log("Flat Lessons:", flatLessons);
+
+    const currentIndex = flatLessons.findIndex(lesson => lesson.id === activeLesson.id);
+
+    if (currentIndex !== -1 && currentIndex < flatLessons.length - 1){
+      const nextLesson = flatLessons[currentIndex + 1];
+      handleLessonClick(nextLesson)
+    } else {
+      alert("You've completed all lessons in this course!");
+    }
+
+  }
+
   if (loading) {
     return <div>Loading course...</div>;
   }
@@ -148,7 +179,7 @@ export default function ViewCourse() {
       />
       <LessonViewer
         lesson={activeLesson}
-        onComplete={() => {}} // Placeholder function for completion logic
+        onComplete={handleCompleteAndContinue}
       />
     </div>
   );

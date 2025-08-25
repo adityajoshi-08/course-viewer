@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Interfaces remain the same...
 interface Lesson {
   id: string;
   name: string;
@@ -12,32 +13,39 @@ interface LessonViewerProps {
   onComplete: () => void;
 }
 
-export function LessonViewer({ lesson, onComplete }: LessonViewerProps){
+export function LessonViewer({ lesson, onComplete }: LessonViewerProps) {
   if (!lesson) {
     return <div style={{ flex: 1, padding: '20px' }}>Select a lesson to get started.</div>;
   }
-    // lesson = {
-    //     id: "1XtgjeAdwycVljvEa8jg3mLwU2Yi5XEW7",
-    //     name: "Sample Video Lesson",
-    //     mimeType: "video/mp4",
-    //     // url: "https://drive.google.com/uc?id=1XtgjeAdwycVljvEa8jg3mLwU2Yi5XEW7&export=download"
-    //     url: "https://drive.google.com/file/d/1Z_C9WYEgbr7I7lUQdKtfqhwOFdIfA9k_/preview"
-    // }
     
   return (
-    <main style={{ flex: 1}} className='overflow-y-auto p-5 pt-1'>
+    // --- MODIFIED ---
+    // Turn the main container into a flex column that fills the available height.
+    <main style={{ flex: 1 }} className='flex flex-col h-full overflow-hidden p-5 pt-1'>
+      
+      {/* --- MODIFIED --- */}
+      {/* This container will now grow to fill the space, and the iframe will fill it. */}
       {lesson.mimeType.startsWith('video/') && (
-        // <video controls width="100%" src={lesson.url} key={lesson.id}>
-        //   Sorry, your browser doesn't support embedded videos.
-        // </video>
-        <div className="w-full h-[80vh]" >
-            <iframe src={lesson.url} className="w-full h-full max-h-[80vh]" title={lesson.name}></iframe>
+        <div className="w-full flex-1">
+          <iframe 
+            src={lesson.url} 
+            className="w-full h-full" 
+            title={lesson.name}
+            // Add allowFullScreen for a better user experience
+            allowFullScreen 
+          ></iframe>
         </div>
       )}
-      <div className='w-full flex items-center justify-between mt-4'>
+
+      {/* --- MODIFIED --- */}
+      {/* This container will not shrink, ensuring the button is always visible and clickable. */}
+      <div className='w-full flex items-center justify-between mt-4 flex-shrink-0'>
         <h2 className='text-lg font-semibold font-poppins break-words max-w-[75%]'>{lesson.name}</h2>
-        <button onClick={onComplete} className='border border-blue-500 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer w-[15vw]'>
-            Complete and Continue
+        <button 
+          onClick={onComplete} 
+          className='border border-blue-500 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer w-[15vw]'
+        >
+          Complete and Continue
         </button>
       </div>
     </main>
