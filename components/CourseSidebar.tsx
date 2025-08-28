@@ -62,7 +62,7 @@ export function CourseItemComponent({ item, activeLessonId, completedLessons, on
         // This class forces the checkbox to be visible even when disabled
         className="disabled:opacity-100"
       />
-      <span>{item.name}</span>
+      <span className="w-[90%]">{item.name}</span>
     </div>
   );
 }
